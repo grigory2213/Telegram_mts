@@ -1,55 +1,56 @@
-from typing import Text
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram import types, Dispatcher
-from create_bot import  dp
 from aiogram.dispatcher.filters import Text
+from data_base import sqlite_db
+from create_bot import  dp, bot
+from keyboards import kb_reg
 
-class FSMadmin(StatesGroup):
-    photo = State()
+user_id = None
+
+class FSMregistration(StatesGroup):
     name = State()
-    description = State()
-    price = State()
+    surname = State()
+    email = State()
 
+async def registration_command(message: types.Message):
+    global user_id 
+    user_id = message.from_user.id
+    is_registred = sqlite_db.is_registred(user_id)
+    if is_registred != '':
+        await bot.send_message(is_registred)
+    else:
+        await bot.send_message('Кажется, вы еще не зарегистрированны! Хотите?', reply_markup=kb_reg)
+         
 
-#Начинаем диалог загрузки нового пункта меню    
-#@dp.message_handler(commands='Загрузить', state=None)
+#Начинаем диалог регистрации
 async def cm_start(message : types.Message):
-    await FSMadmin.photo.set()
-    await message.reply('Загрузи фото')
+    await FSMregistration.name.set()
+    await message.reply('Напишите свое Имя')
     
 #Ловим первый ответ и пишем в словарь
-#@dp.message_handler(content_types = ['photo'], state=FSMadmin.photo)
-async def load_photo(message: types.Message, state: FSMContext):
+async def getting_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['photo'] = message.photo[0].file_id
-    await FSMadmin.next()
-    await message.reply('Теперь введи название')
+        data['id'] = message.from_user.id
+        data['name'] = message.text
+        
+    await FSMregistration.next()
+    await message.reply('Теперь напишите свою Фамилию')
 
 #Ловим второй ответ
-#@dp.message_handler(state =FSMadmin.name)
-async def load_name(message: types.Message, state: FSMContext):
+async def getting_surname(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['name'] = message.text
-    await FSMadmin.next()
-    await message.reply('Введи описание')
+        data['surname'] = message.text
+    await FSMregistration.next()
+    await message.reply('Введите ваш email')
 
 #Ловим третий ответ 
 #@dp.message_handler(state =FSMadmin.description)
-async def load_description(message: types.Message, state: FSMContext):
+async def getting_email(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['description'] = message.text
-    await FSMadmin.next()
-    await message.reply("Теперь укажи цену")
-
-#Ловим четвертый ответ
-#@dp.message_handler(state =FSMadmin.price)
-async def load_price(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['price'] = float(message.text)
+        data['email'] = message.text
         
-    async with state.proxy() as data:
-        await message.reply(str(data))
+    await sqlite_db.sql_add_commend(state)
         
         
     await state.finish()
@@ -65,10 +66,10 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
     
     
-def register_handlers_admin(dp : Dispatcher):
-    dp.register_message_handler(cm_start, commands = ['Загрузить'], state = None)
+def register_handlers_registration(dp : Dispatcher):
+    dp.register_message_handler(registration_command)
+    dp.register_message_handler(cm_start, commands = ['Регистрация'], state = None)
     dp.register_message_handler(cancel_handler,Text(equals='отмена', ignore_case=True), state="*")
-    dp.register_message_handler(load_photo, content_types=['photo'], state = FSMadmin.photo)
-    dp.register_message_handler(load_name, state = FSMadmin.name)
-    dp.register_message_handler(load_description, state = FSMadmin.description)
-    dp.register_message_handler(load_price, state = FSMadmin.price)
+    dp.register_message_handler(getting_name, state = FSMregistration.name)
+    dp.register_message_handler(getting_surname, state = FSMregistration.surname)
+    dp.register_message_handler(getting_email, state = FSMregistration.email)

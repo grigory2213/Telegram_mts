@@ -1,7 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
-b1 = KeyboardButton('/Назначить себе проверку')
+b1 = KeyboardButton('/Назначить')
 
-kb_client = ReplyKeyboardMarkup(resize_keyboard=True)
+kb_adress = ReplyKeyboardMarkup(resize_keyboard=True)
 
-kb_client.add(b1)
+kb_adress.add(b1)

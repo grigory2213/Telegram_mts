@@ -1,6 +1,5 @@
 from aiogram import types, Dispatcher
 from create_bot import dp
-from database import get_info
 
 #@dp.message_handler()
 async def location_send(message : types.Message):
