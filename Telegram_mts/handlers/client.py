@@ -8,14 +8,15 @@ from data_base import sqlite_db
 
 from keyboards import kb_client
 from keyboards import kb_adress
-from keyboards import kb_reg
+from keyboards import kb_reg, kb_list
 
 
 async def command_menu(message: types.Message):
     await bot.send_message(message.from_user.id, 'Приветсвуем вас в боте Profpoint_mts!', reply_markup=kb_client)
-
+    
 async def command_info(message: types.Message):
     await bot.send_message(message.from_user.id, 'Информацию по оплате уточняйте по телефону.')
+    
     
 async def location_request(message: types.Message):
     await bot.send_message(message.from_user.id, 'reply')
@@ -31,12 +32,58 @@ async def location_give(message: types.Message):
     reply = sqlite_db.get_info(lat1, lat2, lon1, lon2)
     for i in reply:
         await bot.send_message(message.from_user.id, f'{i} : {reply[i]}', reply_markup=kb_adress)
+        
+class FSMassignation(StatesGroup):
+    number_state = State()
 
 async def take_one(message: types.Message):
-    await bot.send_message(message.from_user.id, 'Напишите номер проверки:')
+    await FSMassignation.number_state.set()
+    await message.reply('Напишите номер проверки:')
+    
+#Ловим первый ответ и пишем в словарь
+async def number(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    number = int(message.text)
+        
+    result =  sqlite_db.sql_add_number(user_id, number)    
+    await message.reply(result, reply_markup=kb_client)    
+    await state.finish()
 
 
-#####################################################РЕГИСТРАЦИЯ################################################
+async def test(message: types.Message):
+    global user_id
+    user_id = message.from_user.id
+    # print(user_id)
+    reply1 = sqlite_db.get_mylist(user_id)
+    # print(reply1)
+    if len(reply1) == 0:
+        await bot.send_message(message.from_user.id, 'Вы не назначены ни на одну проверку', reply_markup=kb_client)
+    else:    
+        await bot.send_message(message.from_user.id, 'Вы назначены на следующие проверки: ', reply_markup=kb_list)
+        for i in reply1:
+            await bot.send_message(message.from_user.id, f'{i} : {reply1[i]}')
+
+class FSMremove(StatesGroup):
+    number_state = State()
+
+async def remove(message: types.Message):
+    await FSMremove.number_state.set()
+    await message.reply('Напишите номер проверки, от которой хотите отказаться:')
+    
+    
+#Ловим ответ и удаляем проверку у пользователя
+async def remove_number(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    number = int(message.text)
+        
+    result =  sqlite_db.sql_remove_number(user_id, number)    
+    await message.reply(result, reply_markup=kb_client)    
+    await state.finish()
+
+
+
+
+#####################################################РЕГИСТРАЦИЯ#########################################################
 
 user_id = None
 
@@ -82,7 +129,7 @@ async def getting_email(message: types.Message, state: FSMContext):
         data['email'] = message.text
         
     await sqlite_db.sql_add_commend(state)    
-        
+    await message.reply('Спасибо! Теперь вы заргистрированы', reply_markup=kb_client)    
     await state.finish()
 
 #@dp.message_handler(state="*", commands ='отмена')
@@ -98,10 +145,14 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 def register_handlers_client(dp : Dispatcher):
     dp.register_message_handler(command_start, commands = ['start', 'help'])
     dp.register_message_handler(command_menu, commands = ['Меню'])
+    dp.register_message_handler(test, commands = ['Мои_проверки'])
     dp.register_message_handler(command_info, commands = ['Оплата'])
     dp.register_message_handler(location_request, commands=['Проверки рядом со мной'])
     dp.register_message_handler(location_give, content_types=["location"])
-    dp.register_message_handler(take_one, commands=['Назначить'])
+    dp.register_message_handler(take_one, commands=['Назначить'], state = None)
+    dp.register_message_handler(number, state = FSMassignation.number_state)
+    dp.register_message_handler(remove, commands=['Снять_себя_с_проверки'], state = None)
+    dp.register_message_handler(remove_number, state = FSMremove.number_state)
     
 def register_handlers_registration(dp : Dispatcher):
     dp.register_message_handler(cm_start, commands = ['Регистрация'], state = None)
