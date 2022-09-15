@@ -1,5 +1,6 @@
 import sqlite3 as sq
 from urllib import response
+
 global base, cur
 
 #Создаем базу данных с пользователями, если ее не существует
@@ -28,8 +29,20 @@ def is_registred(user_id):
 
     
 async def sql_add_commend(state):
+    global base, cur
     async with state.proxy() as data:
         cur.execute("INSERT INTO users VALUES(?,?,?,?)", tuple(data.values()))
+        base.commit()
+
+async def sql_add_check(state):
+    global base, cur
+    async with state.proxy() as data:
+        list = []
+        list = tuple(data.values())
+        print(list[0], list[1], list[3])
+        cur.execute("INSERT INTO proverka VALUES(?,?,?,?,?,?)", (list[0],list[1],list[2],list[3],list[4],list[5],))
+        cur.execute("UPDATE mts_adress SET done = (?) WHERE unique_id = (?)", (list[0], list[1],))
+        cur.execute("UPDATE mts_adress SET assigned = 0 WHERE unique_id = (?)", (list[1],))
         base.commit()
 
 def sql_add_number(user_id, number):
@@ -40,7 +53,7 @@ def sql_add_number(user_id, number):
         otvet = 'Точки с таким id не существует'
     else:
         cur.execute("UPDATE mts_adress SET assigned = (?) WHERE unique_id = (?)", (user_id, number,))
-        otvet = 'Вы назначены на проверку'
+        otvet = f'Вы назначены на проверку точки {number}. Пожалуйста выполните проверку в течении 48 часов.'
     base.commit()
     return otvet
     
@@ -71,7 +84,7 @@ def get_mylist(user_id):
     
     
 def get_info(latitude1, latitude2, longitude1, longitude2):
-    cur.execute("SELECT * FROM mts_adress WHERE latitude BETWEEN (?) AND (?) AND longitude BETWEEN (?) AND (?)", (latitude1, latitude2, longitude1, longitude2))
+    cur.execute("SELECT * FROM mts_adress WHERE latitude BETWEEN (?) AND (?) AND longitude BETWEEN (?) AND (?) AND assigned = 0 AND done = 0", (latitude1, latitude2, longitude1, longitude2))
     items = cur.fetchall()
     adress_dict = {}
     for item in items:
@@ -79,8 +92,13 @@ def get_info(latitude1, latitude2, longitude1, longitude2):
          adress = item[4]
          adress_dict[id] = adress
          
+    if adress_dict == '':
+        reply = 'Рядом с вами нет свободных проверок.'
+    else:
+        reply = adress_dict
+         
          
     print("Command executed succesfully!")
     base.commit()
     
-    return adress_dict
+    return reply
