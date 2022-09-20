@@ -1,4 +1,5 @@
 
+from pydoc import describe
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -10,6 +11,7 @@ from data_base import sqlite_db
 from keyboards import kb_client
 from keyboards import kb_adress
 from keyboards import kb_reg, kb_list
+from keyboards import kb_answer
 
 
 async def command_menu(message: types.Message):
@@ -162,9 +164,23 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 class FSMfilling(StatesGroup):
     number = State()
     date = State()
-    time = State()
+    time_start = State()
+    time_end = State()
+    clients_operator = State()
+    rezgim = State()
+    number_workers = State()
+    number_clients = State()
+    name_worker = State()
+    dolzhnost_worker = State()
+    describe_worker = State()
+    workers_look = State()
+    bad_worker_FIO = State()
+    sale_office = State()
+    bad_sale_office = State()
+    resume = State()
     audio = State()
-    photo = State()
+    photo1 = State()
+    photo2 = State()
 
 async def command_fill(message: types.Message):
     await FSMfilling.number.set()
@@ -177,33 +193,119 @@ async def getting_number(message: types.Message, state: FSMfilling):
         data_check['number'] = int(message.text)
         
     await FSMfilling.next()
-    await message.reply('Дата проверки. Формат 12.12.2022.')
+    await message.reply('Дата проверки. Формат 12.12.2022')
 
 #Ловим второй ответ
 async def getting_date(message: types.Message, state: FSMfilling):
     async with state.proxy() as data_check:
         data_check['date'] = message.text
     await FSMfilling.next()
-    await message.reply('Время проверки. Формат 17:30')
-
-#Ловим третий ответ
-async def getting_time(message: types.Message, state: FSMfilling):
-    async with state.proxy() as data_check:
-        data_check['time'] = message.text
-    await FSMfilling.next()
-    await message.reply('Прикрепите аудиофайл проверки.')
+    await message.reply('Время начала проверки. Формат 17:20')
     
 #Ловим четвертый ответ
+async def getting_time_start(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['time_start'] = message.text
+    await FSMfilling.next()
+    await message.reply('Время окончания проверки. Формат 17:30')
+
+#Ловим пятый ответ
+async def getting_time_end(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['time_end'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Напишите название оператора, услугами которого вы пользуетесь.')
+
+async def clients_operator(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['clients_operator'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Салон работал согласно режиму работы?', reply_markup=kb_answer)
+ 
+async def getting_rezgim(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['rezgim'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Пришлите количество сотрудников, присутсвовавших во время визита')
+    
+async def getting_number_workers(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['number_workers'] = int(message.text)    
+    await FSMfilling.next()
+    await message.reply('Пришлите количество клиентов, присутсвовавших во время визита')
+    
+async def getting_number_clients(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['number_clients'] = int(message.text)    
+    await FSMfilling.next()
+    await message.reply('Пришлите Имя сотрудника, который проводил консультацию. Если не помните - напишите: не помню. Формат: Иванов Иван Иванович')
+    
+async def getting_name_worker(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['name_worker'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Пришлите Должность сотрудника, который проводил консультацию. Если не помните - напишите: не помню. Формат: консультант')
+    
+async def getting_dolzhnost_worker(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['dolzhnost_worker'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Коротко опишите внешний вид сотрудника.')
+    
+async def getting_describe_worker(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['describe_worker'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Если внешний вид сотрудника не соответствовал требованиям, укажите, что было не так. Если вид сотрудника соответствовал требованиям - напишите :ок.')
+    
+async def getting_workers_look(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['workers_look'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Пришлите Имя сотрудника, который не соответствовал требованиям. Если не помните - напишите: не помню. Формат: Иванов Иван Иванович')
+    
+async def getting_bad_worker_FIO(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['bad_worker_FIO'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Опишите внешний вид офиса продаж, чистоту, порядок, работоспособность оборудования')
+    
+async def getting_sale_office(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['sale_office'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Если внешний вида офиса продаж не соответствовал требованиям, укажите, что было не так. Если ОП соответствовал требованиям - напишите :ок.')
+    
+async def getting_bad_sale_office(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['bad_sale_office'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Напишите короткое резюме визита. Добавьте комментарии по желанию.')    
+            
+async def getting_resume(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['resume'] = message.text    
+    await FSMfilling.next()
+    await message.reply('Пришилите аудиозапись визита.')            
+
+#Ловим шестой ответ
 async def getting_audio(message: types.Message, state: FSMfilling):
     async with state.proxy() as data_check:
         data_check['audio'] = message.audio.file_id
     await FSMfilling.next()
-    await message.reply('Прикрепите фото зала.')
+    await message.reply('Прикрепите фото фасада с первого ракурса.')
     
-#Ловим пятый ответ 
-async def getting_photo(message: types.Message, state: FSMfilling):
+#Ловим седьмой ответ 
+async def getting_photo1(message: types.Message, state: FSMfilling):
     async with state.proxy() as data_check:
-        data_check['photo'] = message.photo[0].file_id
+        data_check['photo1'] = message.photo[0].file_id
+    await FSMfilling.next()
+    await message.reply('Прикрепите фото фасада со второго ракурса.')
+    
+    
+async def getting_photo2(message: types.Message, state: FSMfilling):
+    async with state.proxy() as data_check:
+        data_check['photo2'] = message.photo[0].file_id
     await sqlite_db.sql_add_check(state)    
     await message.reply(f'Спасибо! Анкета {data_check["number"]} -- заполнена!', reply_markup=kb_client)    
     await state.finish()
@@ -216,19 +318,19 @@ async def cancel_handler(message: types.Message, state: FSMfilling):
     await state.finish()
     await message.reply('OK') 
     
-async def scan_message(message: types.Message):
-    document_id = message.document.file_id
-    file_info = await bot.get_file(document_id)
-    print(f'file_id: {file_info.file_id}')
-    print(f'file_path: {file_info.file_path}')
-    print(f'file_size: {file_info.file_size}')
-    print(f'file_unique_id: {file_info.file_unique_id}')
+# async def scan_message(message: types.Message):
+#     document_id = message.document.file_id
+#     file_info = await bot.get_file(document_id)
+#     print(f'file_id: {file_info.file_id}')
+#     print(f'file_path: {file_info.file_path}')
+#     print(f'file_size: {file_info.file_size}')
+#     print(f'file_unique_id: {file_info.file_unique_id}')
 
 
 def register_handlers_client(dp : Dispatcher):
     dp.register_message_handler(command_start, commands = ['start', 'help'])
     dp.register_message_handler(command_menu, commands = ['Меню'])
-    dp.register_message_handler(scan_message, content_types=['document'])
+    # dp.register_message_handler(scan_message, content_types=['document'])
     dp.register_message_handler(test, commands = ['Мои_проверки'])
     dp.register_message_handler(command_info, commands = ['Инструкция'])
     dp.register_message_handler(location_request, commands=['Проверки рядом со мной'])
@@ -243,9 +345,23 @@ def register_handlers_client(dp : Dispatcher):
     dp.register_message_handler(cancel_handler,Text(equals='отмена', ignore_case=True), state="*")
     dp.register_message_handler(getting_number, state = FSMfilling.number)
     dp.register_message_handler(getting_date, state = FSMfilling.date)
-    dp.register_message_handler(getting_time, state = FSMfilling.time)
+    dp.register_message_handler(getting_time_start, state = FSMfilling.time_start)
+    dp.register_message_handler(getting_time_end, state = FSMfilling.time_end)
+    dp.register_message_handler(clients_operator, state = FSMfilling.clients_operator)
+    dp.register_message_handler(getting_rezgim, state = FSMfilling.rezgim)
+    dp.register_message_handler(getting_number_workers, state = FSMfilling.number_workers)
+    dp.register_message_handler(getting_number_clients, state = FSMfilling.number_clients)
+    dp.register_message_handler(getting_name_worker, state = FSMfilling.name_worker)
+    dp.register_message_handler(getting_dolzhnost_worker, state = FSMfilling.dolzhnost_worker)
+    dp.register_message_handler(getting_describe_worker, state = FSMfilling.describe_worker)
+    dp.register_message_handler(getting_workers_look, state = FSMfilling.workers_look)
+    dp.register_message_handler(getting_bad_worker_FIO, state = FSMfilling.bad_worker_FIO)
+    dp.register_message_handler(getting_sale_office, state = FSMfilling.sale_office)
+    dp.register_message_handler(getting_bad_sale_office, state = FSMfilling.bad_sale_office)
+    dp.register_message_handler(getting_resume, state = FSMfilling.resume)
     dp.register_message_handler(getting_audio, content_types=['audio'], state = FSMfilling.audio)
-    dp.register_message_handler(getting_photo, content_types=['photo'], state = FSMfilling.photo)
+    dp.register_message_handler(getting_photo1, content_types=['photo'], state = FSMfilling.photo1)
+    dp.register_message_handler(getting_photo2, content_types=['photo'], state = FSMfilling.photo2)
     
 def register_handlers_registration(dp : Dispatcher):
     dp.register_message_handler(cm_start, commands = ['Регистрация'], state = None)

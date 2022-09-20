@@ -37,10 +37,8 @@ async def sql_add_commend(state):
 async def sql_add_check(state):
     global base, cur
     async with state.proxy() as data:
-        list = []
         list = tuple(data.values())
-        print(list[0], list[1], list[3])
-        cur.execute("INSERT INTO proverka VALUES(?,?,?,?,?,?)", (list[0],list[1],list[2],list[3],list[4],list[5],))
+        cur.execute("INSERT INTO proverka VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", tuple(data.values()))
         cur.execute("UPDATE mts_adress SET done = (?) WHERE unique_id = (?)", (list[0], list[1],))
         cur.execute("UPDATE mts_adress SET assigned = 0 WHERE unique_id = (?)", (list[1],))
         base.commit()
