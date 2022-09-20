@@ -17,6 +17,23 @@ from keyboards import kb_answer
 async def command_menu(message: types.Message):
     await bot.send_message(message.from_user.id, 'Приветсвуем вас в боте Profpoint_mts!', reply_markup=kb_client)
     
+async def helper(message: types.Message):
+    await bot.send_message(message.from_user.id, 'Мы спешим на помощь! Скоро с вами свяжется наш менеджер.', reply_markup=kb_client)
+    
+async def oplata(message: types.Message):
+    await bot.send_message(message.from_user.id, '''
+    Оплата за все проверки прошлого месяца суммируется и начисляется к 15-му числу текущего месяца. Например, за все работы, которые вы выполнили в октябре, оплата будет начислена к 15-му ноября. 15ого числа текущего месяца мы шлём письма всем, кто работал с нами в прошлом месяце, в письмах указана общая сумма начисленной оплаты.
+
+Оплата будет осуществляться трем категориям получателей:
+
+«Самозанятый» на Qugo - дополнительный налог 6% уплачивается самостоятельно,
+
+«Физическое лицо» на Solar Staff - оплата начисляется за вычетом 7%
+
+ИП на Solar Staff – налог выплачивается самостоятельно в зависимости от системы налогооблажения ИП
+                           
+                           ''', reply_markup=kb_client)
+    
 async def command_info(message: types.Message):
     await bot.send_message(message.from_user.id, '''
     Приветствуем вас в боте Profpoint_mts! Бот позволяет найти ближайшие свободные проверки и назначить себя на их выполнение.
@@ -26,14 +43,14 @@ async def command_info(message: types.Message):
 После того, как вы выберите проверки, которые планируете выполнить - они зарезервируются за вами на 48 часов.
 Вы можете снять с себя проверку, но не более 3х раз. Если вы не выполните проверки в течении 48 часов и не отмните их до истечения этого времени - вы будете забанены.
                            
-После выполнения закрепленной за вами проверки - вы можете заполнить анкету прямо в боте. Если вы делаете это со смартфона - убедитесь, что записи с диктофона сохранены как файл(на айфон).
+После выполнения закрепленной за вами проверки - вам необходимо ответить на несколько вопросов прямо в боте. Если вы делаете это со смартфона - убедитесь, что записи с диктофона сохранены как файл(на айфон).
                             
 Если у вас остались вопросы по работе бота - свяжитесь с нами по команде /Поддержка.
                            
 Спасибо! И желаем Удачи.
     ''', reply_markup=kb_client)
     await message.reply_document('BQACAgIAAxkBAAIGy2MkP3jei5iO869ZNqQnOvSSfMDrAAL3IAACWvUpSUPM9QfkM4EuKQQ')
-    await message.reply_document('BQACAgIAAxkBAAIGh2MkNgpLF9ARx_JUR_-P4NUgXnW0AALFIAACWvUpScOeJyNT06GOKQQ')
+    #await message.reply_document('BQACAgIAAxkBAAIGh2MkNgpLF9ARx_JUR_-P4NUgXnW0AALFIAACWvUpScOeJyNT06GOKQQ')
     
     
 async def location_request(message: types.Message):
@@ -365,6 +382,8 @@ def register_handlers_client(dp : Dispatcher):
     
 def register_handlers_registration(dp : Dispatcher):
     dp.register_message_handler(cm_start, commands = ['Регистрация'], state = None)
+    dp.register_message_handler(helper, commands = ['Помощь'])
+    dp.register_message_handler(oplata, commands = ['Оплата'])
     dp.register_message_handler(cancel_handler,Text(equals='отмена', ignore_case=True), state="*")
     dp.register_message_handler(getting_name, state = FSMregistration.name)
     dp.register_message_handler(getting_surname, state = FSMregistration.surname)
