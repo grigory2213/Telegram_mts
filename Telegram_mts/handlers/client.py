@@ -49,7 +49,7 @@ async def command_info(message: types.Message):
                            
 Спасибо! И желаем Удачи.
     ''', reply_markup=kb_client)
-    await message.reply_document('BQACAgIAAxkBAAIGy2MkP3jei5iO869ZNqQnOvSSfMDrAAL3IAACWvUpSUPM9QfkM4EuKQQ')
+    #await message.reply_document('BQACAgIAAxkBAAIGy2MkP3jei5iO869ZNqQnOvSSfMDrAAL3IAACWvUpSUPM9QfkM4EuKQQ')
     #await message.reply_document('BQACAgIAAxkBAAIGh2MkNgpLF9ARx_JUR_-P4NUgXnW0AALFIAACWvUpScOeJyNT06GOKQQ')
     
     
@@ -60,10 +60,10 @@ async def location_give(message: types.Message):
     global reply
     lat = message.location.latitude
     lon = message.location.longitude
-    lat1 = lat-0.1
-    lat2 = lat+0.1
-    lon1 = lon-0.1
-    lon2 = lon+0.1
+    lat1 = lat-5
+    lat2 = lat+5
+    lon1 = lon-5
+    lon2 = lon+5
     reply = sqlite_db.get_info(lat1, lat2, lon1, lon2)
     for i in reply:
         await bot.send_message(message.from_user.id, f'{i} : {reply[i]}', reply_markup=kb_adress)
@@ -97,6 +97,7 @@ async def test(message: types.Message):
         await bot.send_message(message.from_user.id, 'Вы назначены на следующие проверки: ', reply_markup=kb_list)
         for i in reply1:
             await bot.send_message(message.from_user.id, f'{i} : {reply1[i]}')
+        await message.reply_document('BQACAgIAAxkBAAIGy2MkP3jei5iO869ZNqQnOvSSfMDrAAL3IAACWvUpSUPM9QfkM4EuKQQ')
 
 class FSMremove(StatesGroup):
     number_state = State()
