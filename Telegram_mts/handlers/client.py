@@ -16,7 +16,22 @@ async def command_menu(message: types.Message):
     await bot.send_message(message.from_user.id, 'Приветсвуем вас в боте Profpoint_mts!', reply_markup=kb_client)
     
 async def command_info(message: types.Message):
-    await message.reply_audio('CQACAgIAAxkBAAIGHWMi27XLZtP8MK4DBY5OezeC_WTUAAIvHgACTH4ZSeymf1HU1ICeKQQ')
+    await bot.send_message(message.from_user.id, '''
+    Приветствуем вас в боте Profpoint_mts! Бот позволяет найти ближайшие свободные проверки и назначить себя на их выполнение.
+Для того, что бы бот работал корректно - используйте предлагаемые варианты ответов или комманды /start(для возврата к началу) или отмена(для отмены предыдущих действий).
+                           
+Рекомендуем использовать смартфон или планшет, для того, что бы бот мог предлагать вам ближайшие к вам адреса.
+После того, как вы выберите проверки, которые планируете выполнить - они зарезервируются за вами на 48 часов.
+Вы можете снять с себя проверку, но не более 3х раз. Если вы не выполните проверки в течении 48 часов и не отмните их до истечения этого времени - вы будете забанены.
+                           
+После выполнения закрепленной за вами проверки - вы можете заполнить анкету прямо в боте. Если вы делаете это со смартфона - убедитесь, что записи с диктофона сохранены как файл(на айфон).
+                            
+Если у вас остались вопросы по работе бота - свяжитесь с нами по команде /Поддержка.
+                           
+Спасибо! И желаем Удачи.
+    ''', reply_markup=kb_client)
+    await message.reply_document('BQACAgIAAxkBAAIGy2MkP3jei5iO869ZNqQnOvSSfMDrAAL3IAACWvUpSUPM9QfkM4EuKQQ')
+    await message.reply_document('BQACAgIAAxkBAAIGh2MkNgpLF9ARx_JUR_-P4NUgXnW0AALFIAACWvUpScOeJyNT06GOKQQ')
     
     
 async def location_request(message: types.Message):
@@ -26,10 +41,10 @@ async def location_give(message: types.Message):
     global reply
     lat = message.location.latitude
     lon = message.location.longitude
-    lat1 = lat-0.05
-    lat2 = lat+0.05
-    lon1 = lon-0.05
-    lon2 = lon+0.05
+    lat1 = lat-0.1
+    lat2 = lat+0.1
+    lon1 = lon-0.1
+    lon2 = lon+0.1
     reply = sqlite_db.get_info(lat1, lat2, lon1, lon2)
     for i in reply:
         await bot.send_message(message.from_user.id, f'{i} : {reply[i]}', reply_markup=kb_adress)
@@ -200,11 +215,20 @@ async def cancel_handler(message: types.Message, state: FSMfilling):
         return
     await state.finish()
     await message.reply('OK') 
+    
+async def scan_message(message: types.Message):
+    document_id = message.document.file_id
+    file_info = await bot.get_file(document_id)
+    print(f'file_id: {file_info.file_id}')
+    print(f'file_path: {file_info.file_path}')
+    print(f'file_size: {file_info.file_size}')
+    print(f'file_unique_id: {file_info.file_unique_id}')
 
 
 def register_handlers_client(dp : Dispatcher):
     dp.register_message_handler(command_start, commands = ['start', 'help'])
     dp.register_message_handler(command_menu, commands = ['Меню'])
+    dp.register_message_handler(scan_message, content_types=['document'])
     dp.register_message_handler(test, commands = ['Мои_проверки'])
     dp.register_message_handler(command_info, commands = ['Инструкция'])
     dp.register_message_handler(location_request, commands=['Проверки рядом со мной'])
