@@ -19,13 +19,23 @@ def is_registred(user_id):
     name = '' 
     result = base.execute("SELECT EXISTS (SELECT * FROM users WHERE id = (?))", (user_id,))
     responce = result.fetchone()[0]
-    # print(responce)
     if responce != 0:
         result = base.execute("SELECT * FROM users WHERE id = (?)", (user_id,))
         responce = result.fetchone()
-        # print(responce)
         name = responce[1]
     return name
+
+
+def help(user_id):
+    global base, cur
+    registration_data = '' 
+    result = base.execute("SELECT EXISTS (SELECT * FROM users WHERE id = (?))", (user_id,))
+    responce = result.fetchone()[0]
+    if responce != 0:
+        result = base.execute("SELECT * FROM users WHERE id = (?)", (user_id,))
+        responce = result.fetchone()
+        registration_data = responce[3]
+    return registration_data
 
     
 async def sql_add_commend(state):

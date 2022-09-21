@@ -18,7 +18,11 @@ async def command_menu(message: types.Message):
     await bot.send_message(message.from_user.id, 'Приветсвуем вас в боте Profpoint_mts!', reply_markup=kb_client)
     
 async def helper(message: types.Message):
-    await bot.send_message(message.from_user.id, 'Мы спешим на помощь! Скоро с вами свяжется наш менеджер.', reply_markup=kb_client)
+    user_id = message.from_user.id
+    registration_data = sqlite_db.help(user_id)
+    admin_id = 554526841
+    await bot.send_message(message.from_user.id, f'Мы спешим на помощь! Скоро с вами свяжется наш менеджер, по оставленной вами почте {registration_data}.', reply_markup=kb_client)
+    await bot.send_message(admin_id, f'Пользователю {user_id} нужна ваша помощь! Свяжитесь с ним по почте {registration_data} как можно скорее.')
     
 async def oplata(message: types.Message):
     await bot.send_message(message.from_user.id, '''
