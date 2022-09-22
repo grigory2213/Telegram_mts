@@ -20,13 +20,15 @@ async def command_menu(message: types.Message):
 async def helper(message: types.Message):
     user_id = message.from_user.id
     registration_data = sqlite_db.help(user_id)
-    admin_id = 554526841
+    admin_id = 708697982
     await bot.send_message(message.from_user.id, f'Мы спешим на помощь! Скоро с вами свяжется наш менеджер, по оставленной вами почте {registration_data}.', reply_markup=kb_client)
     await bot.send_message(admin_id, f'Пользователю {user_id} нужна ваша помощь! Свяжитесь с ним по почте {registration_data} как можно скорее.')
     
 async def oplata(message: types.Message):
     await bot.send_message(message.from_user.id, '''
-    Оплата за все проверки прошлого месяца суммируется и начисляется к 15-му числу текущего месяца. Например, за все работы, которые вы выполнили в октябре, оплата будет начислена к 15-му ноября. 15ого числа текущего месяца мы шлём письма всем, кто работал с нами в прошлом месяце, в письмах указана общая сумма начисленной оплаты.
+    Оплата за все проверки прошлого месяца суммируется и начисляется к 15-му числу текущего месяца. Например, за все работы, которые вы выполнили в октябре, оплата будет начислена к 15-му ноября.
+
+15-го числа каждого месяца Вам на почту приходит письмо, в котором указана заработанная сумма за прошлый месяц.
 
 Оплата будет осуществляться трем категориям получателей:
 
@@ -40,15 +42,15 @@ async def oplata(message: types.Message):
     
 async def command_info(message: types.Message):
     await bot.send_message(message.from_user.id, '''
-    Приветствуем вас в боте Profpoint_mts! Бот позволяет найти ближайшие свободные проверки и назначить себя на их выполнение.
-Для того, что бы бот работал корректно - используйте предлагаемые варианты ответов или комманды /start(для возврата к началу) или отмена(для отмены предыдущих действий).
-                           
+    Приветствуем вас в боте Profpoint_салоны связи! Бот позволяет найти ближайшие свободные проверки и самостоятельно назначить себя на их выполнение.
+
+Для того, что бы бот работал корректно, используйте предлагаемые им варианты ответов или команды: /start (для возврата к началу), /мои_проверки (чтобы увидеть Ваши проверки) и т.д. Все команды указаны внизу, в меню. Если во время ответов на вопросы анкеты вы понимаете, что ответили некорректно, напишите команду Отмена - заполнение анкеты обнулится.
+
 Рекомендуем использовать смартфон или планшет, для того, что бы бот мог предлагать вам ближайшие к вам адреса.
-После того, как вы выберите проверки, которые планируете выполнить - они зарезервируются за вами на 48 часов.
-Вы можете снять с себя проверку, но не более 3х раз. Если вы не выполните проверки в течении 48 часов и не отмните их до истечения этого времени - вы будете забанены.
-                           
-После выполнения закрепленной за вами проверки - вам необходимо ответить на несколько вопросов прямо в боте. Если вы делаете это со смартфона - убедитесь, что записи с диктофона сохранены как файл(на айфон).
-                            
+После того, как вы выберите проверки, которые планируете выполнить - они будут закреплены за вами на 48 часов.
+Вы можете снять с себя проверку, но не более 3х раз. Если вы не выполните проверки в течении 48 часов и не отмените их до истечения этого времени - вы будете заблокированы и не сможете более выполнять проверки.
+После выполнения закрепленной за вами проверки - вам необходимо ответить на несколько вопросов прямо в боте. Если вы делаете это со смартфона - убедитесь, что записи с диктофона сохранены как файл.
+
 Если у вас остались вопросы по работе бота - свяжитесь с нами по команде /Поддержка.
                            
 Спасибо! И желаем Удачи.
@@ -64,10 +66,10 @@ async def location_give(message: types.Message):
     global reply
     lat = message.location.latitude
     lon = message.location.longitude
-    lat1 = lat-5
-    lat2 = lat+5
-    lon1 = lon-5
-    lon2 = lon+5
+    lat1 = lat-4
+    lat2 = lat+4
+    lon1 = lon-4
+    lon2 = lon+4
     reply = sqlite_db.get_info(lat1, lat2, lon1, lon2)
     for i in reply:
         await bot.send_message(message.from_user.id, f'{i} : {reply[i]}', reply_markup=kb_adress)
@@ -85,7 +87,9 @@ async def number(message: types.Message, state: FSMContext):
     number = int(message.text)
         
     result =  sqlite_db.sql_add_number(user_id, number)    
-    await message.reply(result, reply_markup=kb_client)    
+    await message.reply(result, reply_markup=kb_client)
+    await message.reply('Вот инструкция! Прочитайте ее, перед тем как выполнять проверку!')
+    await message.reply_document('BQACAgIAAxkBAAIGy2MkP3jei5iO869ZNqQnOvSSfMDrAAL3IAACWvUpSUPM9QfkM4EuKQQ')    
     await state.finish()
 
 
@@ -139,7 +143,21 @@ async def command_start(message: types.Message):
     if is_registred != '':
         await bot.send_message(message.from_user.id, f'Добрый день, {is_registred}!', reply_markup=kb_client)
     else:
-        await bot.send_message(message.from_user.id, 'Кажется, вы еще не зарегистрированны! Хотите?', reply_markup=kb_reg)
+        await bot.send_message(message.from_user.id, '''
+        Приветствуем вас в боте Profpoint_салоны связи! Бот позволяет найти ближайшие свободные проверки и самостоятельно назначить себя на их выполнение.
+
+Для того, что бы бот работал корректно, используйте предлагаемые им варианты ответов или команды: /start (для возврата к началу), /мои_проверки (чтобы увидеть Ваши проверки) и т.д. Все команды указаны внизу, в меню. Если во время ответов на вопросы анкеты вы понимаете, что ответили некорректно, напишите команду Отмена - заполнение анкеты обнулится.
+
+Рекомендуем использовать смартфон или планшет, для того, что бы бот мог предлагать вам ближайшие к вам адреса.
+После того, как вы выберите проверки, которые планируете выполнить - они будут закреплены за вами на 48 часов.
+Вы можете снять с себя проверку, но не более 3х раз. Если вы не выполните проверки в течении 48 часов и не отмените их до истечения этого времени - вы будете заблокированы и не сможете более выполнять проверки.
+После выполнения закрепленной за вами проверки - вам необходимо ответить на несколько вопросов прямо в боте. Если вы делаете это со смартфона - убедитесь, что записи с диктофона сохранены как файл.
+
+Если у вас остались вопросы по работе бота - свяжитесь с нами по команде /Поддержка.
+                           
+Спасибо! И желаем Удачи.
+
+Кажется, вы еще не зарегистрированы! Хотите?''', reply_markup=kb_reg)
          
 
 #Начинаем диалог регистрации
@@ -164,12 +182,12 @@ async def getting_surname(message: types.Message, state: FSMContext):
     await message.reply('Введите ваш email')
 
 #Ловим третий ответ 
-async def getting_email(message: types.Message, state: FSMContext):
+async def getting_email(message: types.Message, state: FSMContext):    
     async with state.proxy() as data:
         data['email'] = message.text
         
     await sqlite_db.sql_add_commend(state)    
-    await message.reply('Спасибо! Теперь вы заргистрированы', reply_markup=kb_client)    
+    await message.reply('Спасибо! Теперь вы зарегистрированы', reply_markup=kb_client)  
     await state.finish()
 
 #@dp.message_handler(state="*", commands ='отмена')
@@ -187,18 +205,18 @@ class FSMfilling(StatesGroup):
     number = State()
     date = State()
     time_start = State()
-    time_end = State()
-    clients_operator = State()
+    # time_end = State()
+    # clients_operator = State()
     rezgim = State()
     number_workers = State()
     number_clients = State()
     name_worker = State()
-    dolzhnost_worker = State()
+    # dolzhnost_worker = State()
     describe_worker = State()
-    workers_look = State()
-    bad_worker_FIO = State()
-    sale_office = State()
-    bad_sale_office = State()
+    # workers_look = State()
+    # bad_worker_FIO = State()
+    # sale_office = State()
+    # bad_sale_office = State()
     resume = State()
     audio = State()
     photo1 = State()
@@ -228,19 +246,19 @@ async def getting_date(message: types.Message, state: FSMfilling):
 async def getting_time_start(message: types.Message, state: FSMfilling):
     async with state.proxy() as data_check:
         data_check['time_start'] = message.text
-    await FSMfilling.next()
-    await message.reply('Время окончания проверки. Формат 17:30')
+#     await FSMfilling.next()
+#     await message.reply('Время окончания проверки. Формат 17:30')
 
-#Ловим пятый ответ
-async def getting_time_end(message: types.Message, state: FSMfilling):
-    async with state.proxy() as data_check:
-        data_check['time_end'] = message.text    
-    await FSMfilling.next()
-    await message.reply('Напишите название оператора, услугами которого вы пользуетесь.')
+# #Ловим пятый ответ
+# async def getting_time_end(message: types.Message, state: FSMfilling):
+#     async with state.proxy() as data_check:
+#         data_check['time_end'] = message.text    
+#     await FSMfilling.next()
+#     await message.reply('Напишите название оператора, услугами которого вы пользуетесь.')
 
-async def clients_operator(message: types.Message, state: FSMfilling):
-    async with state.proxy() as data_check:
-        data_check['clients_operator'] = message.text    
+# async def clients_operator(message: types.Message, state: FSMfilling):
+#     async with state.proxy() as data_check:
+#         data_check['clients_operator'] = message.text    
     await FSMfilling.next()
     await message.reply('Салон работал согласно режиму работы?', reply_markup=kb_answer)
  
@@ -260,47 +278,41 @@ async def getting_number_clients(message: types.Message, state: FSMfilling):
     async with state.proxy() as data_check:
         data_check['number_clients'] = int(message.text)    
     await FSMfilling.next()
-    await message.reply('Пришлите Имя сотрудника, который проводил консультацию. Если не помните - напишите: не помню. Формат: Иванов Иван Иванович')
+    await message.reply('Пришлите Имя и Должность сотрудника, который проводил консультацию. Если не помните - напишите: не помню. Формат: Иванов Иван Иванович, консультант')
     
 async def getting_name_worker(message: types.Message, state: FSMfilling):
     async with state.proxy() as data_check:
         data_check['name_worker'] = message.text    
     await FSMfilling.next()
-    await message.reply('Пришлите Должность сотрудника, который проводил консультацию. Если не помните - напишите: не помню. Формат: консультант')
-    
-async def getting_dolzhnost_worker(message: types.Message, state: FSMfilling):
-    async with state.proxy() as data_check:
-        data_check['dolzhnost_worker'] = message.text    
-    await FSMfilling.next()
     await message.reply('Коротко опишите внешний вид сотрудника.')
+    
+# async def getting_describe_worker(message: types.Message, state: FSMfilling):
+#     async with state.proxy() as data_check:
+#         data_check['describe_worker'] = message.text    
+#     await FSMfilling.next()
+#  await message.reply('Если внешний вид сотрудника не соответствовал требованиям, укажите, что было не так. Если вид сотрудника соответствовал требованиям - напишите :ок.')
+    
+# async def getting_workers_look(message: types.Message, state: FSMfilling):
+#     async with state.proxy() as data_check:
+#         data_check['workers_look'] = message.text    
+#     await FSMfilling.next()
+#     await message.reply('Пришлите Имя сотрудника, который не соответствовал требованиям. Если не помните - напишите: не помню. Формат: Иванов Иван Иванович')
     
 async def getting_describe_worker(message: types.Message, state: FSMfilling):
     async with state.proxy() as data_check:
-        data_check['describe_worker'] = message.text    
-    await FSMfilling.next()
-    await message.reply('Если внешний вид сотрудника не соответствовал требованиям, укажите, что было не так. Если вид сотрудника соответствовал требованиям - напишите :ок.')
+        data_check['describe_worker'] = message.text      
+#     await FSMfilling.next()
+#     await message.reply('Опишите внешний вид офиса продаж, чистоту, порядок, работоспособность оборудования')
     
-async def getting_workers_look(message: types.Message, state: FSMfilling):
-    async with state.proxy() as data_check:
-        data_check['workers_look'] = message.text    
-    await FSMfilling.next()
-    await message.reply('Пришлите Имя сотрудника, который не соответствовал требованиям. Если не помните - напишите: не помню. Формат: Иванов Иван Иванович')
+# async def getting_sale_office(message: types.Message, state: FSMfilling):
+#     async with state.proxy() as data_check:
+#         data_check['sale_office'] = message.text    
+#     await FSMfilling.next()
+#     await message.reply('Если внешний вида офиса продаж не соответствовал требованиям, укажите, что было не так. Если ОП соответствовал требованиям - напишите :ок.')
     
-async def getting_bad_worker_FIO(message: types.Message, state: FSMfilling):
-    async with state.proxy() as data_check:
-        data_check['bad_worker_FIO'] = message.text    
-    await FSMfilling.next()
-    await message.reply('Опишите внешний вид офиса продаж, чистоту, порядок, работоспособность оборудования')
-    
-async def getting_sale_office(message: types.Message, state: FSMfilling):
-    async with state.proxy() as data_check:
-        data_check['sale_office'] = message.text    
-    await FSMfilling.next()
-    await message.reply('Если внешний вида офиса продаж не соответствовал требованиям, укажите, что было не так. Если ОП соответствовал требованиям - напишите :ок.')
-    
-async def getting_bad_sale_office(message: types.Message, state: FSMfilling):
-    async with state.proxy() as data_check:
-        data_check['bad_sale_office'] = message.text    
+# async def getting_bad_sale_office(message: types.Message, state: FSMfilling):
+#     async with state.proxy() as data_check:
+#         data_check['bad_sale_office'] = message.text    
     await FSMfilling.next()
     await message.reply('Напишите короткое резюме визита. Добавьте комментарии по желанию.')    
             
@@ -326,10 +338,13 @@ async def getting_photo1(message: types.Message, state: FSMfilling):
     
     
 async def getting_photo2(message: types.Message, state: FSMfilling):
+    admin_id = 708697982
+    user_id = message.from_user.id
     async with state.proxy() as data_check:
         data_check['photo2'] = message.photo[0].file_id
     await sqlite_db.sql_add_check(state)    
     await message.reply(f'Спасибо! Анкета {data_check["number"]} -- заполнена!', reply_markup=kb_client)    
+    await bot.send_message(admin_id, f'Пользователь {user_id}, заполнил анкету {data_check["number"]}')
     await state.finish()
 
 #@dp.message_handler(state="*", commands ='отмена')
@@ -368,18 +383,18 @@ def register_handlers_client(dp : Dispatcher):
     dp.register_message_handler(getting_number, state = FSMfilling.number)
     dp.register_message_handler(getting_date, state = FSMfilling.date)
     dp.register_message_handler(getting_time_start, state = FSMfilling.time_start)
-    dp.register_message_handler(getting_time_end, state = FSMfilling.time_end)
-    dp.register_message_handler(clients_operator, state = FSMfilling.clients_operator)
+    # dp.register_message_handler(getting_time_end, state = FSMfilling.time_end)
+    # dp.register_message_handler(clients_operator, state = FSMfilling.clients_operator)
     dp.register_message_handler(getting_rezgim, state = FSMfilling.rezgim)
     dp.register_message_handler(getting_number_workers, state = FSMfilling.number_workers)
     dp.register_message_handler(getting_number_clients, state = FSMfilling.number_clients)
     dp.register_message_handler(getting_name_worker, state = FSMfilling.name_worker)
-    dp.register_message_handler(getting_dolzhnost_worker, state = FSMfilling.dolzhnost_worker)
+    # dp.register_message_handler(getting_dolzhnost_worker, state = FSMfilling.dolzhnost_worker)
     dp.register_message_handler(getting_describe_worker, state = FSMfilling.describe_worker)
-    dp.register_message_handler(getting_workers_look, state = FSMfilling.workers_look)
-    dp.register_message_handler(getting_bad_worker_FIO, state = FSMfilling.bad_worker_FIO)
-    dp.register_message_handler(getting_sale_office, state = FSMfilling.sale_office)
-    dp.register_message_handler(getting_bad_sale_office, state = FSMfilling.bad_sale_office)
+    # dp.register_message_handler(getting_workers_look, state = FSMfilling.workers_look)
+    # dp.register_message_handler(getting_bad_worker_FIO, state = FSMfilling.bad_worker_FIO)
+    # dp.register_message_handler(getting_sale_office, state = FSMfilling.sale_office)
+    # dp.register_message_handler(getting_bad_sale_office, state = FSMfilling.bad_sale_office)
     dp.register_message_handler(getting_resume, state = FSMfilling.resume)
     dp.register_message_handler(getting_audio, content_types=['audio'], state = FSMfilling.audio)
     dp.register_message_handler(getting_photo1, content_types=['photo'], state = FSMfilling.photo1)
