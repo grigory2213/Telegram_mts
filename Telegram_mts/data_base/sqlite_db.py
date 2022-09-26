@@ -1,3 +1,4 @@
+import re
 import sqlite3 as sq
 from urllib import response
 
@@ -48,21 +49,28 @@ async def sql_add_check(state):
     global base, cur
     async with state.proxy() as data:
         list = tuple(data.values())
-        cur.execute("INSERT INTO proverka VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", tuple(data.values()))
+        cur.execute("INSERT INTO proverka VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", tuple(data.values()))
         cur.execute("UPDATE mts_adress SET done = (?) WHERE unique_id = (?)", (list[0], list[1],))
         cur.execute("UPDATE mts_adress SET assigned = 0 WHERE unique_id = (?)", (list[1],))
         base.commit()
 
 def sql_add_number(user_id, number):
     global base, cur
-    cur.execute("SELECT * FROM mts_adress WHERE unique_id = (?)", (number,))
-    items = cur.fetchall()
-    if items == '':
-        otvet = 'Точки с таким id не существует'
+    cur.execute("SELECT * FROM mts_adress WHERE assigned = (?)", (user_id,))
+    item = cur.fetchall()
+    print(len(item))
+    print(item)
+    if len(item) <= 2:
+        cur.execute("SELECT * FROM mts_adress WHERE unique_id = (?)", (number,))
+        items = cur.fetchall()
+        if items == '':
+            otvet = 'Точки с таким id не существует'
+        else:
+            cur.execute("UPDATE mts_adress SET assigned = (?) WHERE unique_id = (?)", (user_id, number,))
+            otvet = f'Вы назначены на проверку точки {number}. Пожалуйста выполните проверку в течении 48 часов.'
+        base.commit()
     else:
-        cur.execute("UPDATE mts_adress SET assigned = (?) WHERE unique_id = (?)", (user_id, number,))
-        otvet = f'Вы назначены на проверку точки {number}. Пожалуйста выполните проверку в течении 48 часов.'
-    base.commit()
+        otvet = 'Вы уже назначены на 3 или более проверок. Назначение новых станет доступно после их выполнения.'
     return otvet
     
 def sql_remove_number(user_id, number):
@@ -84,9 +92,13 @@ def get_mylist(user_id):
     items = cur.fetchall()
     adress_dict = {}
     for item in items:
-         id = item[0]
-         adress = item[4]
-         adress_dict[id] = adress
+        data = ['', '']
+        id = item[0]
+        adress = item[4]
+        rezhim = item[7]
+        data[0] = adress
+        data[1] = rezhim
+        adress_dict[id] = data
     base.commit()
     return adress_dict
     
@@ -96,17 +108,16 @@ def get_info(latitude1, latitude2, longitude1, longitude2):
     items = cur.fetchall()
     adress_dict = {}
     for item in items:
-         id = item[0]
-         adress = item[4]
-         adress_dict[id] = adress
+        list = ['', '']
+        id = item[0]
+        list[0] = item[4]
+        list[1] = item[13]
+        adress_dict[id] = list
          
     if adress_dict == '':
         reply = 'Рядом с вами нет свободных проверок.'
     else:
         reply = adress_dict
-         
-         
-    print("Command executed succesfully!")
     base.commit()
     
     return reply
