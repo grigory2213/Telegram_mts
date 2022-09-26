@@ -56,8 +56,8 @@ async def command_info(message: types.Message):
                            
 Спасибо! И желаем Удачи.
     ''', reply_markup=kb_client)
-    await message.reply_document('BQACAgIAAxkBAAIGy2MkP3jei5iO869ZNqQnOvSSfMDrAAL3IAACWvUpSUPM9QfkM4EuKQQ')
-    await message.reply_video('BAACAgIAAxkBAAIOgmMxTNu-KSrERyXAWSogtAfwl5kxAAIVHgACbcqJST09Ii3WP81oKgQ')
+    await message.reply_document('BQACAgIAAxkBAAMPYzFu5Fn_4xmpxTW3rKZz1HaP4BQAAuYbAAJwy4lJ86nafYyu6mMpBA')
+    await message.reply_video('BAACAgIAAxkBAAMIYzFsurjC6SuMPtpctTv16_uCSagAAtYbAAJwy4lJE85GYGBz9hopBA')
     #await message.reply_document('BQACAgIAAxkBAAIGh2MkNgpLF9ARx_JUR_-P4NUgXnW0AALFIAACWvUpScOeJyNT06GOKQQ')
     
     
@@ -94,7 +94,7 @@ async def number(message: types.Message, state: FSMContext):
     else:
         await message.reply(result, reply_markup=kb_client)
         await message.reply('Вот инструкция! Прочитайте ее, перед тем как выполнять проверку!')
-        await message.reply_document('BQACAgIAAxkBAAIGy2MkP3jei5iO869ZNqQnOvSSfMDrAAL3IAACWvUpSUPM9QfkM4EuKQQ') 
+        await message.reply_document('BQACAgIAAxkBAAMPYzFu5Fn_4xmpxTW3rKZz1HaP4BQAAuYbAAJwy4lJ86nafYyu6mMpBA') 
        
     await state.finish()
 
@@ -111,7 +111,7 @@ async def test(message: types.Message):
         await bot.send_message(message.from_user.id, 'Вы назначены на следующие проверки: ', reply_markup=kb_list)
         for i in reply1:
             await bot.send_message(message.from_user.id, f'Салон номер {i} : адрес - {reply1[i][0]}, режим работы - {reply1[i][1]}')
-        await message.reply_document('BQACAgIAAxkBAAIGy2MkP3jei5iO869ZNqQnOvSSfMDrAAL3IAACWvUpSUPM9QfkM4EuKQQ')
+        await message.reply_document('BQACAgIAAxkBAAMPYzFu5Fn_4xmpxTW3rKZz1HaP4BQAAuYbAAJwy4lJ86nafYyu6mMpBA')
 
 class FSMremove(StatesGroup):
     number_state = State()
@@ -164,7 +164,7 @@ async def command_start(message: types.Message):
 Спасибо! И желаем Удачи.
 
 Кажется, вы еще не зарегистрированы! Хотите?''', reply_markup=kb_reg)
-        await message.reply_video('BAACAgIAAxkBAAIOgmMxTNu-KSrERyXAWSogtAfwl5kxAAIVHgACbcqJST09Ii3WP81oKgQ')
+        await message.reply_video('BAACAgIAAxkBAAMIYzFsurjC6SuMPtpctTv16_uCSagAAtYbAAJwy4lJE85GYGBz9hopBA')
          
 
 #Начинаем диалог регистрации
@@ -363,19 +363,19 @@ async def cancel_handler(message: types.Message, state: FSMfilling):
     await state.finish()
     await message.reply('OK') 
     
-async def scan_message(message: types.Message):
-    document_id = message.video.file_id
-    file_info = await bot.get_file(document_id)
-    print(f'file_id: {file_info.file_id}')
-    print(f'file_path: {file_info.file_path}')
-    print(f'file_size: {file_info.file_size}')
-    print(f'file_unique_id: {file_info.file_unique_id}')
+# async def scan_message(message: types.Message):
+#     document_id = message.document.file_id
+#     file_info = await bot.get_file(document_id)
+#     print(f'file_id: {file_info.file_id}')
+#     print(f'file_path: {file_info.file_path}')
+#     print(f'file_size: {file_info.file_size}')
+#     print(f'file_unique_id: {file_info.file_unique_id}')
 
 
 def register_handlers_client(dp : Dispatcher):
     dp.register_message_handler(command_start, commands = ['start', 'help'])
     dp.register_message_handler(command_menu, commands = ['Меню'])
-    dp.register_message_handler(scan_message, content_types=['video'])
+    # dp.register_message_handler(scan_message, content_types=['document'])
     dp.register_message_handler(test, commands = ['Мои_проверки'])
     dp.register_message_handler(command_info, commands = ['Инструкция'])
     dp.register_message_handler(location_request, commands=['Проверки рядом со мной'])

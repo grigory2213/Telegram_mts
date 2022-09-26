@@ -4,5 +4,5 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 storage  = MemoryStorage()
 
-bot = Bot(token = "5688739893:AAEx7ai8SXsM4THmnLwm8P9S9P81GoVmO10")
+bot = Bot(token = "5438493035:AAGoWM_UjtUE8Abnmkt3YjbWmnYGvK5uyv4")
 dp  = Dispatcher(bot, storage=storage)
