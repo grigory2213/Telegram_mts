@@ -1,11 +1,11 @@
 import sqlite3
 import pandas as pd
 
-df_adress = pd.read_csv('/home/grigory/Local/Work/Telegram_mts/Files_mts/adresses.csv')
+df_adress = pd.read_csv('/home/grigory/Local/Work/Telegram_mts/Telegram_mts/adress.csv')
 
 # Обработка первоначального файла
 #df_adress = df_adress.drop(['Бренд ОП', 'Формат салона', 'Юр.лицо', 'Легенда для проверки', 'Предмет для консультации', 'Нас.пункт признак'], axis = 1)
-df_adress = df_adress.rename(columns={"Код ОП": "unique_id", "Бренд ОП": "brend", "Область":"region", "Населённый пункт название": "city", "Адрес Офиса продаж":"adress", "GPS координаты. широта":"latitude", "GPS координаты. долгота":"longitude", "Режим работы":"work_time", "Тип строения":"building", "Дата закрытия точки":"close_date", "Дата открытия точки":"open_date", "ТП":"done"})
+df_adress = df_adress.rename(columns={"Код ОП": "unique_id", "Бренд ОП": "brend", "Область":"region", "Населённый пункт название": "city", "Адрес Офиса продаж":"adress", "GPS координаты. широта":"latitude", "GPS координаты. долгота":"longitude", "Режим работы":"work_time", "Тип строения":"building", "Дата закрытия точки":"close_date", "Дата открытия точки":"open_date", "ТП":"done", "Оплата":"payment"})
 df_adress['done'].fillna(0, inplace=True)
 df_adress_done = df_adress.loc[df_adress['done'] != 0]
 df_adress_done['done'] = 1
@@ -18,7 +18,7 @@ c = conn.cursor()
 #Создаем табличку с адресами
 c.execute(
     """
-    CREATE TABLE IF NOT EXISTS mts_adresses (
+    CREATE TABLE mts_newone (
        unique_id INTEGER,
        brend TEXT,
        region TEXT, 
@@ -30,6 +30,8 @@ c.execute(
        building TEXT,
        close_date TEXT,
        open_date TEXT,
+       assigned INTEGER,
+       payment INTEGER,
        done INTEGER,
        PRIMARY KEY(unique_id)
         )
@@ -37,7 +39,7 @@ c.execute(
 )
 
 #Передаем в таблицу данные из экселевского файла
-df_adress.to_sql('mts_adresses', conn, if_exists='append', index=False)
+df_adress.to_sql('mts_newone', conn, if_exists='append', index=False)
 
 conn.commit()
 

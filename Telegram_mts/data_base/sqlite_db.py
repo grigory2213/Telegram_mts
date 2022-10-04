@@ -51,7 +51,6 @@ async def sql_add_check(state):
         list = tuple(data.values())
         cur.execute("INSERT INTO proverka VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", tuple(data.values()))
         cur.execute("UPDATE mts_adress SET done = (?) WHERE unique_id = (?)", (list[0], list[1],))
-        cur.execute("UPDATE mts_adress SET assigned = 0 WHERE unique_id = (?)", (list[1],))
         base.commit()
 
 def sql_add_number(user_id, number):
@@ -104,14 +103,16 @@ def get_mylist(user_id):
     
     
 def get_info(latitude1, latitude2, longitude1, longitude2):
+    global base, cur
     cur.execute("SELECT * FROM mts_adress WHERE latitude BETWEEN (?) AND (?) AND longitude BETWEEN (?) AND (?) AND assigned = 0 AND done = 0", (latitude1, latitude2, longitude1, longitude2))
     items = cur.fetchall()
     adress_dict = {}
+    print(adress_dict)
     for item in items:
         list = ['', '']
         id = item[0]
         list[0] = item[4]
-        list[1] = item[13]
+        list[1] = item[11]
         adress_dict[id] = list
          
     if adress_dict == '':

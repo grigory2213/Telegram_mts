@@ -22,7 +22,7 @@ def main():
     """Shows basic usage of the Sheets API.
     Prints values from a sample spreadsheet.
     """
-    creds = 'AIzaSyBYaHrk_Clij2NN72B2c2kvQqSplXoGOZI'
+    creds = '/home/grigory/Local/Work/Telegram_mts/Telegram_mts/data_base/new1.json'
     # # The file token.json stores the user's access and refresh tokens, and is
     # # created automatically when the authorization flow completes for the first
     # # time.
@@ -65,6 +65,14 @@ def main():
         print(row)
         print(data.head(5))
         data.to_csv('now_closed.csv')
+        
+        service = build('sheets', 'v4', credentials=creds)
+
+        # Call the Sheets API
+        sheet = service.spreadsheets()
+        result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME).execute()
+        
+        
     except HttpError as err:
         print(err)
 
