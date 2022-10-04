@@ -57,17 +57,20 @@ def sql_add_number(user_id, number):
     global base, cur
     cur.execute("SELECT * FROM mts_adress WHERE assigned = (?)", (user_id,))
     item = cur.fetchall()
-    print(len(item))
-    print(item)
     if len(item) <= 2:
         cur.execute("SELECT * FROM mts_adress WHERE unique_id = (?)", (number,))
         items = cur.fetchall()
         if items == '':
             otvet = 'Точки с таким id не существует'
         else:
-            cur.execute("UPDATE mts_adress SET assigned = (?) WHERE unique_id = (?)", (user_id, number,))
-            otvet = f'Вы назначены на проверку точки {number}. Пожалуйста выполните проверку в течении 48 часов.'
-        base.commit()
+            cur.execute("SELECT done FROM mts_adress WHERE unique_id = (?)", (number,))
+            done = cur.fetchone()
+            if done[0] == 1:
+                otvet = f'На проверку точки {number} уже назначен ТП. Выберите другой адрес.'
+            else:
+                cur.execute("UPDATE mts_adress SET assigned = (?) WHERE unique_id = (?)", (user_id, number,))
+                otvet = f'Вы назначены на проверку точки {number}. Пожалуйста выполните проверку в течении 48 часов.'
+            base.commit()
     else:
         otvet = 'Вы уже назначены на 3 или более проверок. Назначение новых станет доступно после их выполнения.'
     return otvet
