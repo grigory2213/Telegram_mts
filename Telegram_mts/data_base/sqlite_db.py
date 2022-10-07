@@ -57,7 +57,7 @@ def sql_add_number(user_id, number):
     global base, cur
     cur.execute("SELECT * FROM mts_adress WHERE assigned = (?)", (user_id,))
     item = cur.fetchall()
-    if len(item) <= 2:
+    if user_id == 1510043020 or len(item) <= 2:
         cur.execute("SELECT * FROM mts_adress WHERE unique_id = (?)", (number,))
         items = cur.fetchall()
         if items == '':
@@ -65,7 +65,7 @@ def sql_add_number(user_id, number):
         else:
             cur.execute("SELECT done FROM mts_adress WHERE unique_id = (?)", (number,))
             done = cur.fetchone()
-            if done[0] == 1:
+            if done[0] != 0:
                 otvet = f'На проверку точки {number} уже назначен ТП. Выберите другой адрес.'
             else:
                 cur.execute("UPDATE mts_adress SET assigned = (?) WHERE unique_id = (?)", (user_id, number,))

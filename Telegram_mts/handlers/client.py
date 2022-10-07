@@ -72,7 +72,6 @@ async def location_give(message: types.Message):
     lat2 = lat+3
     lon1 = lon-3
     lon2 = lon+3
-    print(lat, lon)
     reply = sqlite_db.get_info(lat1, lat2, lon1, lon2)
     for i in reply:
         await bot.send_message(message.from_user.id, f'Салон {i} : адрес - {reply[i][0]}, оплата: {reply[i][1]}', reply_markup=kb_adress)
